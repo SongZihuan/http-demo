@@ -1,11 +1,13 @@
 package acme
 
 import (
+	"bytes"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/gob"
 	"encoding/pem"
 	"fmt"
 	"github.com/go-acme/lego/v4/certcrypto"
@@ -19,7 +21,41 @@ import (
 	"time"
 )
 
-func newCert(email string, httpsAddress string, domain string) (crypto.PrivateKey, *certificate.Resource, error) {
+func saveAccount(dir string, email string, reg *registration.Resource) error {
+	filepath := path.Join(dir, fmt.Sprintf("%s.account", email))
+
+	var buff bytes.Buffer
+	enc := gob.NewEncoder(&buff)
+	err := enc.Encode(reg)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filepath, buff.Bytes(), 0644)
+}
+
+func loadAccount(dir string, email string) (*registration.Resource, error) {
+	filepath := path.Join(dir, fmt.Sprintf("%s.account", email))
+	file, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = file.Close()
+	}()
+
+	var reg registration.Resource
+	dec := gob.NewDecoder(file)
+
+	err = dec.Decode(&reg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &reg, nil
+}
+
+func newCert(dir string, email string, httpsAddress string, domain string) (crypto.PrivateKey, *certificate.Resource, error) {
 	privateKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -49,11 +85,19 @@ func newCert(email string, httpsAddress string, domain string) (crypto.PrivateKe
 		TermsOfServiceAgreed: true,
 	}
 
-	reg, err := client.Registration.Register(regOption)
+	reg, err := loadAccount(path.Join(dir, "account"), email)
 	if err != nil {
-		return nil, nil, err
-	}
+		// 尝试注册
+		reg, err = client.Registration.Register(regOption)
+		if err != nil {
+			return nil, nil, err
+		}
 
+		err = saveAccount(dir, email, reg)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
 	user.setRegistration(reg)
 
 	if domain == "" {

@@ -26,7 +26,7 @@ func GetCertificateAndPrivateKey(dir string, email string, httpsAddress string, 
 		return privateKey, cert, nil
 	}
 
-	privateKey, resource, err := newCert(email, httpsAddress, domain)
+	privateKey, resource, err := newCert(dir, email, httpsAddress, domain)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -99,7 +99,7 @@ func watchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 		return nil, nil, nil
 	}
 
-	privateKey, resource, err := newCert(email, httpsAddress, domain)
+	privateKey, resource, err := newCert(dir, email, httpsAddress, domain)
 	if err != nil {
 		return nil, nil, err
 	}
