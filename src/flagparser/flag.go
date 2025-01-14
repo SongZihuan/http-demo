@@ -25,7 +25,10 @@ func InitFlag() (err error) {
 	flag.StringVar(&HttpsEmail, "https-email", HttpsEmail, "https cert email")
 	flag.StringVar(&HttpsCertDir, "https-cert-dir", HttpsCertDir, "https cert save dir")
 
+	flag.BoolVar(&DryRun, "dry-run", DryRun, "only parser the options")
+
 	flag.Parse()
 
+	Print()
 	return nil
 }

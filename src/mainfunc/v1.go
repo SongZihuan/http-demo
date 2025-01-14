@@ -17,6 +17,10 @@ func MainV1() (exitcode int) {
 		return 1
 	}
 
+	if flagparser.DryRun {
+		return 0
+	}
+
 	err = engine.InitEngine()
 	if err != nil {
 		fmt.Printf("init engine fail: %s\n", err.Error())

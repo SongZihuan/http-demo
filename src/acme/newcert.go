@@ -40,7 +40,7 @@ func newCert(email string, httpsAddress string, domain string) (crypto.PrivateKe
 		return nil, nil, err
 	}
 
-	err = client.Challenge.SetHTTP01Provider(http01.NewProviderServer(iface, port))
+	err = client.Challenge.SetHTTP01Provider(http01.NewProviderServer(domain, port))
 	if err != nil {
 		return nil, nil, err
 	}
