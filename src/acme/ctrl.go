@@ -22,11 +22,7 @@ func GetCertificateAndPrivateKey(dir string, email string, httpsAddress string, 
 	}
 
 	privateKey, cert, err := ReadLocalCertificateAndPrivateKey(dir)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if checkCertWithDomain(cert, domain) && checkCertWithTime(cert, 5*24*time.Hour) {
+	if err == nil && checkCertWithDomain(cert, domain) && checkCertWithTime(cert, 5*24*time.Hour) {
 		return privateKey, cert, nil
 	}
 
