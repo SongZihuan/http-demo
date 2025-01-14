@@ -20,6 +20,11 @@ func InitFlag() (err error) {
 	flag.StringVar(&HttpAddress, "http-address", HttpAddress, "http server address")
 	flag.StringVar(&HttpAddress, "h", HttpAddress, "http server address")
 
+	flag.StringVar(&HttpsAddress, "https-address", HttpsAddress, "https server address")
+	flag.StringVar(&HttpsDomain, "https-domain", HttpsDomain, "https server domain")
+	flag.StringVar(&HttpsEmail, "https-email", HttpsEmail, "https cert email")
+	flag.StringVar(&HttpsCertDir, "https-cert-dir", HttpsCertDir, "https cert save dir")
+
 	flag.Parse()
 
 	return nil

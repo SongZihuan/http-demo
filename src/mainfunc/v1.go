@@ -6,6 +6,7 @@ import (
 	"github.com/SongZihuan/Http-Demo/src/engine"
 	"github.com/SongZihuan/Http-Demo/src/flagparser"
 	"github.com/SongZihuan/Http-Demo/src/httpserver"
+	"github.com/SongZihuan/Http-Demo/src/httpsslserver"
 	"github.com/SongZihuan/Http-Demo/src/signalchan"
 )
 
@@ -22,21 +23,36 @@ func MainV1() (exitcode int) {
 		return 1
 	}
 
-	err = httpserver.InitHttpServer()
+	err = signalchan.InitSignal()
 	if err != nil {
+		fmt.Printf("init signal fail: %s\n", err.Error())
 		return 1
 	}
 
-	err = signalchan.InitSignal()
+	err = httpserver.InitHttpServer()
 	if err != nil {
 		fmt.Printf("init http server fail: %s\n", err.Error())
 		return 1
 	}
 
 	var httpchan = make(chan error)
+	var httpsslchan = make(chan error)
+
 	go func() {
 		httpchan <- httpserver.RunServer()
 	}()
+
+	if flagparser.HttpsAddress != "" {
+		err = httpsslserver.InitHttpSSLServer()
+		if err != nil {
+			fmt.Printf("init https server fail: %s\n", err.Error())
+			return 1
+		}
+
+		go func() {
+			httpsslchan <- httpsslserver.RunServer()
+		}()
+	}
 
 	select {
 	case <-signalchan.SignalChan:
@@ -44,10 +60,17 @@ func MainV1() (exitcode int) {
 		return 0
 	case err := <-httpchan:
 		if errors.Is(err, httpserver.ErrStop) {
-			fmt.Printf("Server closed: safe\n")
+			fmt.Printf("Http Server closed: safe\n")
 			return 0
 		}
-		fmt.Printf("Server error closed: %s\n", err.Error())
+		fmt.Printf("Http Server error closed: %s\n", err.Error())
+		return 1
+	case err := <-httpsslchan:
+		if errors.Is(err, httpserver.ErrStop) {
+			fmt.Printf("Https Server closed: safe\n")
+			return 0
+		}
+		fmt.Printf("Https Server error closed: %s\n", err.Error())
 		return 1
 	}
 }
