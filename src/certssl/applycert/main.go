@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func ApplyCert(basedir string, email string, httpsAddress string, domain string) (crypto.PrivateKey, *certificate.Resource, error) {
+func ApplyCert(basedir string, email string, acmeAddress string, domain string) (crypto.PrivateKey, *certificate.Resource, error) {
 	privateKey, err := certcrypto.GeneratePrivateKey(certcrypto.RSA4096)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate private key failed: %s", err.Error())
@@ -29,14 +29,14 @@ func ApplyCert(basedir string, email string, httpsAddress string, domain string)
 		return nil, nil, fmt.Errorf("new client failed: %s", err.Error())
 	}
 
-	iface, port, err := net.SplitHostPort(httpsAddress)
+	host, port, err := net.SplitHostPort(acmeAddress)
 	if err != nil {
 		return nil, nil, fmt.Errorf("split host port failed: %s", err.Error())
 	} else if port == "" {
 		port = "443"
 	}
 
-	err = client.Challenge.SetHTTP01Provider(http01.NewProviderServer(domain, port))
+	err = client.Challenge.SetHTTP01Provider(http01.NewProviderServer(host, port))
 	if err != nil {
 		return nil, nil, fmt.Errorf("set http01 provider failed: %s", err.Error())
 	}
@@ -50,7 +50,7 @@ func ApplyCert(basedir string, email string, httpsAddress string, domain string)
 	user.setRegistration(reg)
 
 	if domain == "" {
-		domain = iface
+		domain = host
 	}
 
 	request := certificate.ObtainRequest{

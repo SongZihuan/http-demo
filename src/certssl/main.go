@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func GetCertificateAndPrivateKey(basedir string, email string, httpsAddress string, domain string) (crypto.PrivateKey, *x509.Certificate, error) {
+func GetCertificateAndPrivateKey(basedir string, email string, acmeAddress string, domain string) (crypto.PrivateKey, *x509.Certificate, error) {
 	if email == "" {
 		email = "no-reply@example.com"
 	}
@@ -27,7 +27,7 @@ func GetCertificateAndPrivateKey(basedir string, email string, httpsAddress stri
 		return privateKey, cert, nil
 	}
 
-	privateKey, resource, err := applycert.ApplyCert(basedir, email, httpsAddress, domain)
+	privateKey, resource, err := applycert.ApplyCert(basedir, email, acmeAddress, domain)
 	if err != nil {
 		return nil, nil, fmt.Errorf("apply cert failed: %s", err.Error())
 	} else if privateKey == nil || cert == nil {
@@ -48,7 +48,7 @@ type NewCert struct {
 	Error       error
 }
 
-func WatchCertificateAndPrivateKey(dir string, email string, httpsAddress string, domain string, oldPrivateKey crypto.PrivateKey, oldCert *x509.Certificate, stopchan chan bool, newchan chan NewCert) error {
+func WatchCertificateAndPrivateKey(dir string, email string, acmeAddress string, domain string, oldCert *x509.Certificate, stopchan chan bool, newchan chan NewCert) error {
 	for {
 		select {
 		case <-stopchan:
@@ -60,7 +60,7 @@ func WatchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 			close(stopchan)
 			return nil
 		default:
-			privateKey, cert, err := watchCertificateAndPrivateKey(dir, email, httpsAddress, domain, oldPrivateKey, oldCert)
+			privateKey, cert, err := watchCertificateAndPrivateKey(dir, email, acmeAddress, domain, oldCert)
 			if err != nil {
 				newchan <- NewCert{
 					Error: fmt.Errorf("watch cert failed: %s", err.Error()),
@@ -75,7 +75,7 @@ func WatchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 	}
 }
 
-func watchCertificateAndPrivateKey(dir string, email string, httpsAddress string, domain string, oldPrivateKey crypto.PrivateKey, oldCert *x509.Certificate) (crypto.PrivateKey, *x509.Certificate, error) {
+func watchCertificateAndPrivateKey(dir string, email string, acmeAddress string, domain string, oldCert *x509.Certificate) (crypto.PrivateKey, *x509.Certificate, error) {
 	if email == "" {
 		email = "no-reply@example.com"
 	}
@@ -92,7 +92,7 @@ func watchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 		return nil, nil, nil
 	}
 
-	privateKey, resource, err := applycert.ApplyCert(dir, email, httpsAddress, domain)
+	privateKey, resource, err := applycert.ApplyCert(dir, email, acmeAddress, domain)
 	if err != nil {
 		return nil, nil, fmt.Errorf("apply cert fail: %s", err.Error())
 	}

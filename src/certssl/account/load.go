@@ -28,7 +28,7 @@ func loadAccount(dir string, email string) (Account, error) {
 		return Account{}, fmt.Errorf("decode account failed: %s", err.Error())
 	}
 
-	if time.Now().After(account.ExpirationTime) {
+	if time.Now().After(time.Unix(account.ExpirationTime, 0)) {
 		return Account{}, ErrExpiredAccount
 	}
 

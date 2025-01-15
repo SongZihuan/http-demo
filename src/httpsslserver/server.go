@@ -20,6 +20,7 @@ var HttpSSLAddress string
 var HttpSSLDomain string
 var HttpSSLEmail string
 var HttpSSLCertDir string
+var ACMEAddress string
 
 var PrivateKey crypto.PrivateKey
 var Certificate *x509.Certificate
@@ -32,10 +33,11 @@ func InitHttpSSLServer() (err error) {
 	HttpSSLDomain = flagparser.HttpsDomain
 	HttpSSLEmail = flagparser.HttpsEmail
 	HttpSSLCertDir = flagparser.HttpsCertDir
+	ACMEAddress = flagparser.ACMEAddress
 
-	PrivateKey, Certificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain)
+	PrivateKey, Certificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, ACMEAddress, HttpSSLDomain)
 	if err != nil {
-		return fmt.Errorf("Init htttps error: %s", err.Error())
+		return fmt.Errorf("init htttps error: %s", err.Error())
 	}
 
 	return initHttpSSLServer()
@@ -90,7 +92,7 @@ func WatchCert(stopchan chan bool) {
 	newchan := make(chan certssl.NewCert)
 
 	go func() {
-		err := certssl.WatchCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain, PrivateKey, Certificate, stopchan, newchan)
+		err := certssl.WatchCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain, Certificate, stopchan, newchan)
 		if err != nil {
 			fmt.Printf("watch https cert server error: %s", err.Error())
 		}

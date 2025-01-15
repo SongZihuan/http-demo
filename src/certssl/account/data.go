@@ -13,8 +13,8 @@ const DefaultAccountExp = 24 * time.Hour
 type Account struct {
 	Resource       registration.Resource // 避免使用指针
 	Email          string
-	RegisterTime   time.Time
-	ExpirationTime time.Time
+	RegisterTime   int64
+	ExpirationTime int64
 }
 
 func newAccount(email string, client *lego.Client) (Account, error) {
@@ -29,7 +29,7 @@ func newAccount(email string, client *lego.Client) (Account, error) {
 	return Account{
 		Resource:       *res,
 		Email:          email,
-		RegisterTime:   now,
-		ExpirationTime: now.Add(DefaultAccountExp),
+		RegisterTime:   now.Unix(),
+		ExpirationTime: now.Add(DefaultAccountExp).Unix(),
 	}, nil
 }
