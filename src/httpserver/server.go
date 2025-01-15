@@ -30,5 +30,5 @@ func RunServer() error {
 	if err != nil && errors.Is(err, http.ErrServerClosed) {
 		return ErrStop
 	}
-	return err
+	return fmt.Errorf("http server error: %s", err)
 }

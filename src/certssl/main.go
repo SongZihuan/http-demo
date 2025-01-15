@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/SongZihuan/Http-Demo/src/certssl/applycert"
-	utils2 "github.com/SongZihuan/Http-Demo/src/utils"
+	"github.com/SongZihuan/Http-Demo/src/utils"
 	"time"
 )
 
@@ -14,27 +14,27 @@ func GetCertificateAndPrivateKey(basedir string, email string, httpsAddress stri
 		email = "no-reply@example.com"
 	}
 
-	if !utils2.IsValidEmail(email) {
+	if !utils.IsValidEmail(email) {
 		return nil, nil, fmt.Errorf("not a valid email")
 	}
 
-	if !utils2.IsValidDomain(domain) {
+	if !utils.IsValidDomain(domain) {
 		return nil, nil, fmt.Errorf("not a valid domain")
 	}
 
 	privateKey, cert, err := applycert.ReadLocalCertificateAndPrivateKey(basedir)
-	if err == nil && utils2.CheckCertWithDomain(cert, domain) && utils2.CheckCertWithTime(cert, 5*24*time.Hour) {
+	if err == nil && utils.CheckCertWithDomain(cert, domain) && utils.CheckCertWithTime(cert, 5*24*time.Hour) {
 		return privateKey, cert, nil
 	}
 
 	privateKey, resource, err := applycert.ApplyCert(basedir, email, httpsAddress, domain)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("apply cert failed: %s", err.Error())
 	}
 
-	cert, err = utils2.ReadCertificate(resource.Certificate)
+	cert, err = utils.ReadCertificate(resource.Certificate)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("read cert failed: %s", err.Error())
 	}
 
 	return privateKey, cert, nil
@@ -61,7 +61,7 @@ func WatchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 			privateKey, cert, err := watchCertificateAndPrivateKey(dir, email, httpsAddress, domain, oldPrivateKey, oldCert)
 			if err != nil {
 				newchan <- NewCert{
-					Error: err,
+					Error: fmt.Errorf("watch cert failed: %s", err.Error()),
 				}
 			} else if privateKey != nil || cert != nil {
 				newchan <- NewCert{
@@ -78,26 +78,26 @@ func watchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 		email = "no-reply@example.com"
 	}
 
-	if !utils2.IsValidEmail(email) {
+	if !utils.IsValidEmail(email) {
 		return nil, nil, fmt.Errorf("not a valid email")
 	}
 
-	if !utils2.IsValidDomain(domain) {
+	if !utils.IsValidDomain(domain) {
 		return nil, nil, fmt.Errorf("not a valid domain")
 	}
 
-	if utils2.CheckCertWithDomain(oldCert, domain) && utils2.CheckCertWithTime(oldCert, 5*24*time.Hour) {
+	if utils.CheckCertWithDomain(oldCert, domain) && utils.CheckCertWithTime(oldCert, 5*24*time.Hour) {
 		return nil, nil, nil
 	}
 
 	privateKey, resource, err := applycert.ApplyCert(dir, email, httpsAddress, domain)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("apply cert fail: %s", err.Error())
 	}
 
-	cert, err := utils2.ReadCertificate(resource.Certificate)
+	cert, err := utils.ReadCertificate(resource.Certificate)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("read cert failed: %s", err.Error())
 	}
 
 	return privateKey, cert, nil

@@ -32,6 +32,7 @@ func MainV1() (exitcode int) {
 		fmt.Printf("init signal fail: %s\n", err.Error())
 		return 1
 	}
+	defer signalchan.CloseSignal()
 
 	err = httpserver.InitHttpServer()
 	if err != nil {
@@ -41,6 +42,10 @@ func MainV1() (exitcode int) {
 
 	var httpchan = make(chan error)
 	var httpsslchan = make(chan error)
+	defer func() {
+		close(httpchan)
+		close(httpsslchan)
+	}()
 
 	go func() {
 		httpchan <- httpserver.RunServer()

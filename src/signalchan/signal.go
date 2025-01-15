@@ -20,3 +20,8 @@ func InitSignal() (err error) {
 	signal.Notify(SignalChan, syscall.SIGINT, syscall.SIGTERM)
 	return nil
 }
+
+func CloseSignal() {
+	signal.Stop(SignalChan)
+	close(SignalChan)
+}

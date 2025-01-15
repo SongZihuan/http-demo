@@ -10,28 +10,28 @@ import (
 	"path"
 )
 
-func ReadLocalCertificateAndPrivateKey(dir string) (crypto.PrivateKey, *x509.Certificate, error) {
-	cert, err := readCertificate(dir)
+func ReadLocalCertificateAndPrivateKey(basedir string) (crypto.PrivateKey, *x509.Certificate, error) {
+	cert, err := readCertificate(basedir)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("read certificate failed: %s", err.Error())
 	}
 
-	privateKey, err := readPrivateKey(dir)
+	privateKey, err := readPrivateKey(basedir)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("read private key failed: %s", err.Error())
 	}
 
 	return privateKey, cert, nil
 }
 
-func readCertificate(dir string) (*x509.Certificate, error) {
+func readCertificate(basedir string) (*x509.Certificate, error) {
 	// 请替换为你的证书文件路径
-	certPath := path.Join(dir, filename.FileCertificate)
+	certPath := path.Join(basedir, filename.FileCertificate)
 
 	// 读取PEM编码的证书文件
 	pemData, err := os.ReadFile(certPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read certificate file: %v", err)
 	}
 
 	// 解析PEM编码的数据
@@ -49,9 +49,9 @@ func readCertificate(dir string) (*x509.Certificate, error) {
 	return cert, nil
 }
 
-func readPrivateKey(dir string) (crypto.PrivateKey, error) {
+func readPrivateKey(basedir string) (crypto.PrivateKey, error) {
 	// 请替换为你的RSA私钥文件路径
-	keyPath := path.Join(dir, filename.FilePrivateKey)
+	keyPath := path.Join(basedir, filename.FilePrivateKey)
 
 	// 读取PEM编码的私钥文件
 	pemData, err := os.ReadFile(keyPath)

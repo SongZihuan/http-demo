@@ -1,6 +1,7 @@
 package account
 
 import (
+	"fmt"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
 	"time"
@@ -19,7 +20,7 @@ type Account struct {
 func newAccount(email string, client *lego.Client) (Account, error) {
 	res, err := register(client)
 	if err != nil {
-		return Account{}, err
+		return Account{}, fmt.Errorf("new account failed: %s", err.Error())
 	}
 
 	now := time.Now()

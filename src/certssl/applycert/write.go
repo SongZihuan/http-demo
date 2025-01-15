@@ -9,10 +9,10 @@ import (
 	"path"
 )
 
-func writerWithDate(baseDir string, resource *certificate.Resource) error {
+func writerWithDate(dir string, resource *certificate.Resource) error {
 	cert, err := utils.ReadCertificate(resource.Certificate)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read certificate: %s", err.Error())
 	}
 
 	domain := cert.Subject.CommonName
@@ -25,28 +25,28 @@ func writerWithDate(baseDir string, resource *certificate.Resource) error {
 	month := fmt.Sprintf("%d", cert.NotBefore.Month())
 	day := fmt.Sprintf("%d", cert.NotBefore.Day())
 
-	dir := path.Join(baseDir, domain, year, month, day)
-	err = os.MkdirAll(dir, 0775)
+	backupdir := path.Join(dir, domain, year, month, day)
+	err = os.MkdirAll(backupdir, 0775)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dir, filename.FilePrivateKey), resource.PrivateKey, os.ModePerm)
+	err = os.WriteFile(path.Join(backupdir, filename.FilePrivateKey), resource.PrivateKey, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dir, filename.FileCertificate), resource.Certificate, os.ModePerm)
+	err = os.WriteFile(path.Join(backupdir, filename.FileCertificate), resource.Certificate, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dir, filename.FileIssuerCertificate), resource.IssuerCertificate, os.ModePerm)
+	err = os.WriteFile(path.Join(backupdir, filename.FileIssuerCertificate), resource.IssuerCertificate, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dir, filename.FileCSR), resource.CSR, os.ModePerm)
+	err = os.WriteFile(path.Join(backupdir, filename.FileCSR), resource.CSR, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -54,28 +54,28 @@ func writerWithDate(baseDir string, resource *certificate.Resource) error {
 	return nil
 }
 
-func writer(dir string, resource *certificate.Resource) error {
-	err := os.MkdirAll(dir, 0775)
+func writer(basedir string, resource *certificate.Resource) error {
+	err := os.MkdirAll(basedir, 0775)
+	if err != nil {
+		return fmt.Errorf("failed to create directory %s: %s", basedir, err.Error())
+	}
+
+	err = os.WriteFile(path.Join(basedir, filename.FilePrivateKey), resource.PrivateKey, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dir, filename.FilePrivateKey), resource.PrivateKey, os.ModePerm)
+	err = os.WriteFile(path.Join(basedir, filename.FileCertificate), resource.Certificate, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dir, filename.FileCertificate), resource.Certificate, os.ModePerm)
+	err = os.WriteFile(path.Join(basedir, filename.FileIssuerCertificate), resource.IssuerCertificate, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dir, filename.FileIssuerCertificate), resource.IssuerCertificate, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(path.Join(dir, filename.FileCSR), resource.CSR, os.ModePerm)
+	err = os.WriteFile(path.Join(basedir, filename.FileCSR), resource.CSR, os.ModePerm)
 	if err != nil {
 		return err
 	}

@@ -15,7 +15,7 @@ func loadAccount(dir string, email string) (Account, error) {
 
 	file, err := os.Open(filepath)
 	if err != nil {
-		return Account{}, err
+		return Account{}, fmt.Errorf("open account file failed: %s", err.Error())
 	}
 	defer func() {
 		_ = file.Close()
@@ -26,7 +26,7 @@ func loadAccount(dir string, email string) (Account, error) {
 
 	err = dec.Decode(&account)
 	if err != nil {
-		return Account{}, err
+		return Account{}, fmt.Errorf("decode account failed: %s", err.Error())
 	}
 
 	if time.Now().After(account.ExpirationTime) {

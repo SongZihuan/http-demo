@@ -11,7 +11,7 @@ import (
 func saveAccount(dir string, account Account) error {
 	err := os.MkdirAll(dir, 0775)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create directory %s: %s", dir, err.Error())
 	}
 	filepath := path.Join(dir, fmt.Sprintf("%s.account", account.Email))
 

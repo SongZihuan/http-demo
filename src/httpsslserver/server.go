@@ -35,7 +35,7 @@ func InitHttpSSLServer() (err error) {
 
 	PrivateKey, Certificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain)
 	if err != nil {
-		return err
+		return fmt.Errorf("Init htttps error: %s", err.Error())
 	}
 
 	return initHttpSSLServer()
@@ -81,7 +81,7 @@ ListenCycle:
 			ReloadMutex.Unlock() // 等待证书更换完毕
 			continue ListenCycle
 		} else if err != nil {
-			return err
+			return fmt.Errorf("https server error: %s", err.Error())
 		}
 	}
 }
@@ -92,7 +92,7 @@ func WatchCert(stopchan chan bool) {
 	go func() {
 		err := certssl.WatchCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain, PrivateKey, Certificate, stopchan, newchan)
 		if err != nil {
-			fmt.Printf("watch cert error: %s", err.Error())
+			fmt.Printf("watch https cert server error: %s", err.Error())
 		}
 	}()
 
@@ -103,7 +103,7 @@ func WatchCert(stopchan chan bool) {
 				close(newchan)
 				return
 			} else if res.Error != nil {
-				fmt.Printf("watch cert error: %s", res.Error.Error())
+				fmt.Printf("https cert reload server error: %s", res.Error.Error())
 			} else if res.PrivateKey == nil && res.Certificate == nil {
 				func() {
 					ReloadMutex.Lock()
@@ -114,7 +114,7 @@ func WatchCert(stopchan chan bool) {
 
 					err := HttpSSLServer.Shutdown(ctx)
 					if err != nil {
-						fmt.Printf("reload error: %s", err.Error())
+						fmt.Printf("https server reload error: %s", err.Error())
 					}
 
 					PrivateKey = res.PrivateKey
