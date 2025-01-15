@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/SongZihuan/Http-Demo/src/certssl/applycert"
-	"github.com/SongZihuan/Http-Demo/utils"
+	utils2 "github.com/SongZihuan/Http-Demo/src/utils"
 	"time"
 )
 
@@ -14,16 +14,16 @@ func GetCertificateAndPrivateKey(basedir string, email string, httpsAddress stri
 		email = "no-reply@example.com"
 	}
 
-	if !utils.IsValidEmail(email) {
+	if !utils2.IsValidEmail(email) {
 		return nil, nil, fmt.Errorf("not a valid email")
 	}
 
-	if !utils.IsValidDomain(domain) {
+	if !utils2.IsValidDomain(domain) {
 		return nil, nil, fmt.Errorf("not a valid domain")
 	}
 
 	privateKey, cert, err := applycert.ReadLocalCertificateAndPrivateKey(basedir)
-	if err == nil && utils.CheckCertWithDomain(cert, domain) && utils.CheckCertWithTime(cert, 5*24*time.Hour) {
+	if err == nil && utils2.CheckCertWithDomain(cert, domain) && utils2.CheckCertWithTime(cert, 5*24*time.Hour) {
 		return privateKey, cert, nil
 	}
 
@@ -32,7 +32,7 @@ func GetCertificateAndPrivateKey(basedir string, email string, httpsAddress stri
 		return nil, nil, err
 	}
 
-	cert, err = utils.ReadCertificate(resource.Certificate)
+	cert, err = utils2.ReadCertificate(resource.Certificate)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -78,15 +78,15 @@ func watchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 		email = "no-reply@example.com"
 	}
 
-	if !utils.IsValidEmail(email) {
+	if !utils2.IsValidEmail(email) {
 		return nil, nil, fmt.Errorf("not a valid email")
 	}
 
-	if !utils.IsValidDomain(domain) {
+	if !utils2.IsValidDomain(domain) {
 		return nil, nil, fmt.Errorf("not a valid domain")
 	}
 
-	if utils.CheckCertWithDomain(oldCert, domain) && utils.CheckCertWithTime(oldCert, 5*24*time.Hour) {
+	if utils2.CheckCertWithDomain(oldCert, domain) && utils2.CheckCertWithTime(oldCert, 5*24*time.Hour) {
 		return nil, nil, nil
 	}
 
@@ -95,7 +95,7 @@ func watchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 		return nil, nil, err
 	}
 
-	cert, err := utils.ReadCertificate(resource.Certificate)
+	cert, err := utils2.ReadCertificate(resource.Certificate)
 	if err != nil {
 		return nil, nil, err
 	}

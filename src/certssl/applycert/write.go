@@ -3,7 +3,7 @@ package applycert
 import (
 	"fmt"
 	"github.com/SongZihuan/Http-Demo/src/certssl/filename"
-	"github.com/SongZihuan/Http-Demo/utils"
+	"github.com/SongZihuan/Http-Demo/src/utils"
 	"github.com/go-acme/lego/v4/certificate"
 	"os"
 	"path"
