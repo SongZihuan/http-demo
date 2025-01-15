@@ -7,7 +7,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"github.com/SongZihuan/Http-Demo/src/acme"
+	"github.com/SongZihuan/Http-Demo/src/certssl"
 	"github.com/SongZihuan/Http-Demo/src/engine"
 	"github.com/SongZihuan/Http-Demo/src/flagparser"
 	"net/http"
@@ -33,7 +33,7 @@ func InitHttpSSLServer() (err error) {
 	HttpSSLEmail = flagparser.HttpsEmail
 	HttpSSLCertDir = flagparser.HttpsCertDir
 
-	PrivateKey, Certificate, err = acme.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain)
+	PrivateKey, Certificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain)
 	if err != nil {
 		return err
 	}
@@ -87,10 +87,10 @@ ListenCycle:
 }
 
 func WatchCert(stopchan chan bool) {
-	newchan := make(chan acme.NewCert)
+	newchan := make(chan certssl.NewCert)
 
 	go func() {
-		err := acme.WatchCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain, PrivateKey, Certificate, stopchan, newchan)
+		err := certssl.WatchCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAddress, HttpSSLDomain, PrivateKey, Certificate, stopchan, newchan)
 		if err != nil {
 			fmt.Printf("watch cert error: %s", err.Error())
 		}

@@ -1,14 +1,15 @@
-package acme
+package certssl
 
 import (
 	"crypto"
 	"crypto/x509"
 	"fmt"
+	"github.com/SongZihuan/Http-Demo/src/certssl/applycert"
 	"github.com/SongZihuan/Http-Demo/utils"
 	"time"
 )
 
-func GetCertificateAndPrivateKey(dir string, email string, httpsAddress string, domain string) (crypto.PrivateKey, *x509.Certificate, error) {
+func GetCertificateAndPrivateKey(basedir string, email string, httpsAddress string, domain string) (crypto.PrivateKey, *x509.Certificate, error) {
 	if email == "" {
 		email = "no-reply@example.com"
 	}
@@ -21,27 +22,17 @@ func GetCertificateAndPrivateKey(dir string, email string, httpsAddress string, 
 		return nil, nil, fmt.Errorf("not a valid domain")
 	}
 
-	privateKey, cert, err := ReadLocalCertificateAndPrivateKey(dir)
-	if err == nil && checkCertWithDomain(cert, domain) && checkCertWithTime(cert, 5*24*time.Hour) {
+	privateKey, cert, err := applycert.ReadLocalCertificateAndPrivateKey(basedir)
+	if err == nil && utils.CheckCertWithDomain(cert, domain) && utils.CheckCertWithTime(cert, 5*24*time.Hour) {
 		return privateKey, cert, nil
 	}
 
-	privateKey, resource, err := newCert(dir, email, httpsAddress, domain)
+	privateKey, resource, err := applycert.ApplyCert(basedir, email, httpsAddress, domain)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	err = writerWithDate(dir, resource)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = writer(dir, resource)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	cert, err = getCert(resource)
+	cert, err = utils.ReadCertificate(resource.Certificate)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -95,59 +86,19 @@ func watchCertificateAndPrivateKey(dir string, email string, httpsAddress string
 		return nil, nil, fmt.Errorf("not a valid domain")
 	}
 
-	if checkCertWithDomain(oldCert, domain) && checkCertWithTime(oldCert, 5*24*time.Hour) {
+	if utils.CheckCertWithDomain(oldCert, domain) && utils.CheckCertWithTime(oldCert, 5*24*time.Hour) {
 		return nil, nil, nil
 	}
 
-	privateKey, resource, err := newCert(dir, email, httpsAddress, domain)
+	privateKey, resource, err := applycert.ApplyCert(dir, email, httpsAddress, domain)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	err = writerWithDate(dir, resource)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = writer(dir, resource)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	cert, err := getCert(resource)
+	cert, err := utils.ReadCertificate(resource.Certificate)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return privateKey, cert, nil
-}
-
-func checkCertWithDomain(cert *x509.Certificate, domain string) bool {
-	// 遍历主题备用名称查找匹配的域名
-	for _, name := range cert.DNSNames {
-		if name == domain {
-			return true // 找到了匹配的域名
-		}
-	}
-
-	// 检查通用名作为回退，虽然现代实践倾向于使用SAN
-	if cert.Subject.CommonName != "" && cert.Subject.CommonName == domain {
-		return true // 通用名匹配
-	}
-
-	// 如果没有找到匹配，则返回错误
-	return false
-}
-
-func checkCertWithTime(cert *x509.Certificate, gracePeriod time.Duration) bool {
-	now := time.Now()
-	nowWithGracePeriod := now.Add(gracePeriod)
-
-	if now.Before(cert.NotBefore) {
-		return false
-	} else if nowWithGracePeriod.After(cert.NotBefore) {
-		return false
-	}
-
-	return false
 }

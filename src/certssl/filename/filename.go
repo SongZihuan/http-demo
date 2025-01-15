@@ -1,4 +1,4 @@
-package acme
+package filename
 
 const (
 	FilePrivateKey        = "private.key"

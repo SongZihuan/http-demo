@@ -1,21 +1,22 @@
-package acme
+package applycert
 
 import (
 	"crypto"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"github.com/SongZihuan/Http-Demo/src/certssl/filename"
 	"os"
 	"path"
 )
 
 func ReadLocalCertificateAndPrivateKey(dir string) (crypto.PrivateKey, *x509.Certificate, error) {
-	cert, err := ReadCertificate(dir)
+	cert, err := readCertificate(dir)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	privateKey, err := ReadPrivateKey(dir)
+	privateKey, err := readPrivateKey(dir)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -23,9 +24,9 @@ func ReadLocalCertificateAndPrivateKey(dir string) (crypto.PrivateKey, *x509.Cer
 	return privateKey, cert, nil
 }
 
-func ReadCertificate(dir string) (*x509.Certificate, error) {
+func readCertificate(dir string) (*x509.Certificate, error) {
 	// 请替换为你的证书文件路径
-	certPath := path.Join(dir, FileCertificate)
+	certPath := path.Join(dir, filename.FileCertificate)
 
 	// 读取PEM编码的证书文件
 	pemData, err := os.ReadFile(certPath)
@@ -48,9 +49,9 @@ func ReadCertificate(dir string) (*x509.Certificate, error) {
 	return cert, nil
 }
 
-func ReadPrivateKey(dir string) (crypto.PrivateKey, error) {
+func readPrivateKey(dir string) (crypto.PrivateKey, error) {
 	// 请替换为你的RSA私钥文件路径
-	keyPath := path.Join(dir, FilePrivateKey)
+	keyPath := path.Join(dir, filename.FilePrivateKey)
 
 	// 读取PEM编码的私钥文件
 	pemData, err := os.ReadFile(keyPath)

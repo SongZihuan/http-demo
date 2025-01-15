@@ -1,4 +1,4 @@
-package acme
+package applycert
 
 import (
 	"crypto"
@@ -11,7 +11,7 @@ type CertUser struct {
 	key          crypto.PrivateKey
 }
 
-func NewUser(email string, key crypto.PrivateKey) *CertUser {
+func newUser(email string, key crypto.PrivateKey) *CertUser {
 	return &CertUser{
 		email: email,
 		key:   key,
