@@ -20,7 +20,7 @@ func MainV1() (exitcode int) {
 	}
 
 	if flagparser.Verbose {
-		fmt.Printf("Version: %s", resource.Version)
+		fmt.Printf("Version: %s\n", resource.Version)
 		return 0
 	}
 
