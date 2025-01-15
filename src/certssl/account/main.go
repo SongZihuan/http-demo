@@ -1,7 +1,6 @@
 package account
 
 import (
-	"errors"
 	"fmt"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
@@ -15,10 +14,12 @@ func GetAccount(dir string, email string, client *lego.Client) (*registration.Re
 	}
 
 	account, err := loadAccount(dir, email)
-	if err != nil && errors.Is(err, ErrExpiredAccount) {
+	if err != nil {
 		account, err = newAccount(email, client)
 		if err != nil {
 			return nil, fmt.Errorf("not local account, new account failed: %s", err.Error())
+		} else if account.Email == "" {
+			return nil, fmt.Errorf("not local account, new account failed: return empty account, not email, unknown reason")
 		}
 
 		err = saveAccount(dir, account)
@@ -26,9 +27,9 @@ func GetAccount(dir string, email string, client *lego.Client) (*registration.Re
 			return nil, fmt.Errorf("not local account, save account failed: %s", err.Error())
 		}
 
-		fmt.Printf("account register success %s\n", email)
-	} else if err != nil {
-		return nil, nil
+		fmt.Printf("account register success email: %s\n", email)
+	} else {
+		fmt.Printf("load local account success email: %s\n", email)
 	}
 
 	return &account.Resource, nil

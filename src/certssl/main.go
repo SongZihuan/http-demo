@@ -30,6 +30,8 @@ func GetCertificateAndPrivateKey(basedir string, email string, httpsAddress stri
 	privateKey, resource, err := applycert.ApplyCert(basedir, email, httpsAddress, domain)
 	if err != nil {
 		return nil, nil, fmt.Errorf("apply cert failed: %s", err.Error())
+	} else if privateKey == nil || cert == nil {
+		return nil, nil, fmt.Errorf("read cert failed: private key or certificate (resource) is nil, unknown reason")
 	}
 
 	cert, err = utils.ReadCertificate(resource.Certificate)

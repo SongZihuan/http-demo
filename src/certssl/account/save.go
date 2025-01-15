@@ -22,5 +22,10 @@ func saveAccount(dir string, account Account) error {
 		return err
 	}
 
-	return os.WriteFile(filepath, buff.Bytes(), 0644)
+	err = os.WriteFile(filepath, buff.Bytes(), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write account %s: %s", filepath, err.Error())
+	}
+
+	return nil
 }

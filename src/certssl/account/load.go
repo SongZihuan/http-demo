@@ -12,7 +12,6 @@ var ErrExpiredAccount = fmt.Errorf("account not found")
 
 func loadAccount(dir string, email string) (Account, error) {
 	filepath := path.Join(dir, fmt.Sprintf("%s.account", email))
-
 	file, err := os.Open(filepath)
 	if err != nil {
 		return Account{}, fmt.Errorf("open account file failed: %s", err.Error())

@@ -21,6 +21,8 @@ func newAccount(email string, client *lego.Client) (Account, error) {
 	res, err := register(client)
 	if err != nil {
 		return Account{}, fmt.Errorf("new account failed: %s", err.Error())
+	} else if res == nil {
+		return Account{}, fmt.Errorf("new account failed: register return nil, unknown error")
 	}
 
 	now := time.Now()

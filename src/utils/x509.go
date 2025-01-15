@@ -15,7 +15,9 @@ func ReadCertificate(data []byte) (*x509.Certificate, error) {
 
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse certificate: %v", err)
+		return nil, fmt.Errorf("failed to parse certificate: %s", err.Error())
+	} else if cert == nil {
+		return nil, fmt.Errorf("failed to parse certificate: return nil, unknown reason")
 	}
 
 	return cert, nil

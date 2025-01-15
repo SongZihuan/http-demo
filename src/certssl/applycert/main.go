@@ -32,6 +32,8 @@ func ApplyCert(basedir string, email string, httpsAddress string, domain string)
 	iface, port, err := net.SplitHostPort(httpsAddress)
 	if err != nil {
 		return nil, nil, fmt.Errorf("split host port failed: %s", err.Error())
+	} else if port == "" {
+		port = "443"
 	}
 
 	err = client.Challenge.SetHTTP01Provider(http01.NewProviderServer(domain, port))
@@ -42,6 +44,8 @@ func ApplyCert(basedir string, email string, httpsAddress string, domain string)
 	reg, err := account.GetAccount(path.Join(basedir, "account"), user.GetEmail(), client)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get account failed: %s", err.Error())
+	} else if reg == nil {
+		return nil, nil, fmt.Errorf("get account failed: return nil account.resurce, unknown reason")
 	}
 	user.setRegistration(reg)
 
