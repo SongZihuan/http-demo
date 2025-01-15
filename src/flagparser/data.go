@@ -9,6 +9,7 @@ var HttpsEmail = ""
 var HttpsCertDir = "./ssl-certs"
 var ACMEAddress = ""
 var DryRun = false
+var Verbose = false
 
 func Print() {
 	fmt.Println("HttpAddress:", HttpAddress)

@@ -28,6 +28,9 @@ func InitFlag() (err error) {
 
 	flag.BoolVar(&DryRun, "dry-run", DryRun, "only parser the options")
 
+	flag.BoolVar(&Verbose, "version", Verbose, "show the version")
+	flag.BoolVar(&Verbose, "version", Verbose, "show the version")
+
 	flag.Parse()
 
 	Print()

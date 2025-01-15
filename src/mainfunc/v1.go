@@ -3,6 +3,7 @@ package mainfunc
 import (
 	"errors"
 	"fmt"
+	resource "github.com/SongZihuan/Http-Demo"
 	"github.com/SongZihuan/Http-Demo/src/engine"
 	"github.com/SongZihuan/Http-Demo/src/flagparser"
 	"github.com/SongZihuan/Http-Demo/src/httpserver"
@@ -11,10 +12,16 @@ import (
 )
 
 func MainV1() (exitcode int) {
+	fmt.Printf("")
 	err := flagparser.InitFlag()
 	if err != nil {
 		fmt.Printf("init flag fail: %s\n", err.Error())
 		return 1
+	}
+
+	if flagparser.Verbose {
+		fmt.Printf("Version: %s", resource.Version)
+		return 0
 	}
 
 	if flagparser.DryRun {
