@@ -39,7 +39,7 @@ func GetCertificateAndPrivateKey(basedir string, email string, aliyunAccessKey s
 	privateKey, resource, err := applycert.ApplyCert(basedir, email, aliyunAccessKey, aliyunAccessSecret, domain)
 	if err != nil {
 		return nil, nil, fmt.Errorf("apply cert failed: %s", err.Error())
-	} else if privateKey == nil || cert == nil {
+	} else if privateKey == nil || resource == nil {
 		return nil, nil, fmt.Errorf("read cert failed: private key or certificate (resource) is nil, unknown reason")
 	}
 
