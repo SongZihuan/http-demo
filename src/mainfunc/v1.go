@@ -25,6 +25,7 @@ func MainV1() (exitcode int) {
 	}
 
 	if flagparser.DryRun {
+		flagparser.Print()
 		return 0
 	}
 

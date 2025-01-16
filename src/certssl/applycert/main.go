@@ -4,16 +4,20 @@ import (
 	"crypto"
 	"fmt"
 	"github.com/SongZihuan/Http-Demo/src/certssl/account"
+	"github.com/SongZihuan/Http-Demo/src/utils"
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/certificate"
-	"github.com/go-acme/lego/v4/challenge/http01"
 	"github.com/go-acme/lego/v4/lego"
-	"net"
+	"github.com/go-acme/lego/v4/providers/dns/alidns"
 	"path"
 	"time"
 )
 
-func ApplyCert(basedir string, email string, acmeAddress string, domain string) (crypto.PrivateKey, *certificate.Resource, error) {
+func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string) (crypto.PrivateKey, *certificate.Resource, error) {
+	if domain == "" || !utils.IsValidDomain(domain) {
+		return nil, nil, fmt.Errorf("domain is invalid")
+	}
+
 	privateKey, err := certcrypto.GeneratePrivateKey(certcrypto.RSA4096)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate private key failed: %s", err.Error())
@@ -24,21 +28,28 @@ func ApplyCert(basedir string, email string, acmeAddress string, domain string) 
 	config := lego.NewConfig(user)
 	config.Certificate.KeyType = certcrypto.RSA4096
 	config.Certificate.Timeout = 30 * 24 * time.Hour
+	config.CADirURL = "https://acme-v02.api.letsencrypt.org/directory"
 	client, err := lego.NewClient(config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("new client failed: %s", err.Error())
 	}
 
-	host, port, err := net.SplitHostPort(acmeAddress)
-	if err != nil {
-		return nil, nil, fmt.Errorf("split host port failed: %s", err.Error())
-	} else if port == "" {
-		port = "443"
+	aliyunDnsConfig := alidns.NewDefaultConfig()
+	if aliyunAccessKey != "" {
+		aliyunDnsConfig.APIKey = aliyunAccessKey
+	}
+	if aliyunAccessSecret == "" {
+		aliyunDnsConfig.SecretKey = aliyunAccessSecret
 	}
 
-	err = client.Challenge.SetHTTP01Provider(http01.NewProviderServer(host, port))
+	provider, err := alidns.NewDNSProviderConfig(aliyunDnsConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("set http01 provider failed: %s", err.Error())
+		return nil, nil, fmt.Errorf("failed to initialize AliDNS provider: %d", err.Error())
+	}
+
+	err = client.Challenge.SetDNS01Provider(provider)
+	if err != nil {
+		return nil, nil, fmt.Errorf("set challenge dns1 provider failed: %s", err.Error())
 	}
 
 	reg, err := account.GetAccount(path.Join(basedir, "account"), user.GetEmail(), client)
@@ -48,10 +59,6 @@ func ApplyCert(basedir string, email string, acmeAddress string, domain string) 
 		return nil, nil, fmt.Errorf("get account failed: return nil account.resurce, unknown reason")
 	}
 	user.setRegistration(reg)
-
-	if domain == "" {
-		domain = host
-	}
 
 	request := certificate.ObtainRequest{
 		Domains: []string{domain},

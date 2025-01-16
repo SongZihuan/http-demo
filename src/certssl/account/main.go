@@ -32,5 +32,5 @@ func GetAccount(dir string, email string, client *lego.Client) (*registration.Re
 		fmt.Printf("load local account success email: %s\n", email)
 	}
 
-	return &account.Resource, nil
+	return account.Resource, nil
 }

@@ -1,13 +1,17 @@
 package flagparser
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 var HttpAddress string = ":3366"
 var HttpsAddress string = ""
 var HttpsDomain = ""
 var HttpsEmail = ""
 var HttpsCertDir = "./ssl-certs"
-var ACMEAddress = ""
+var HttpsAliyunKey string
+var HttpsAliyunSecret string
 var DryRun = false
 var Verbose = false
 
@@ -17,5 +21,6 @@ func Print() {
 	fmt.Println("HttpsDomain:", HttpsDomain)
 	fmt.Println("HttpsEmail:", HttpsEmail)
 	fmt.Println("HttpsCertDir:", HttpsCertDir)
-	fmt.Println("ACMEAddress:", ACMEAddress)
+	fmt.Println("HttpsAliyunKey:", HttpsAliyunKey)
+	fmt.Println("HttpsAliyunSecret:", strings.Repeat("*", len(HttpsAliyunSecret)))
 }

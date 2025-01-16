@@ -1,7 +1,7 @@
 package account
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -10,26 +10,21 @@ import (
 
 var ErrExpiredAccount = fmt.Errorf("account not found")
 
-func loadAccount(dir string, email string) (Account, error) {
-	filepath := path.Join(dir, fmt.Sprintf("%s.account", email))
-	file, err := os.Open(filepath)
+func loadAccount(dir string, email string) (*Account, error) {
+	filepath := path.Join(dir, fmt.Sprintf("%s.account.json", email))
+	data, err := os.ReadFile(filepath)
 	if err != nil {
-		return Account{}, fmt.Errorf("open account file failed: %s", err.Error())
+		return nil, fmt.Errorf("read account file failed: %s", err.Error())
 	}
-	defer func() {
-		_ = file.Close()
-	}()
 
-	var account Account
-	dec := gob.NewDecoder(file)
-
-	err = dec.Decode(&account)
+	account := new(Account)
+	err = json.Unmarshal(data, account)
 	if err != nil {
-		return Account{}, fmt.Errorf("decode account failed: %s", err.Error())
+		return nil, fmt.Errorf("load account error")
 	}
 
 	if time.Now().After(time.Unix(account.ExpirationTime, 0)) {
-		return Account{}, ErrExpiredAccount
+		return nil, ErrExpiredAccount
 	}
 
 	return account, nil

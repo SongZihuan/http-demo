@@ -4,12 +4,21 @@ import (
 	"crypto"
 	"crypto/x509"
 	"fmt"
+	"github.com/SongZihuan/Http-Demo/src/certssl/aliyunclear"
 	"github.com/SongZihuan/Http-Demo/src/certssl/applycert"
 	"github.com/SongZihuan/Http-Demo/src/utils"
 	"time"
 )
 
-func GetCertificateAndPrivateKey(basedir string, email string, acmeAddress string, domain string) (crypto.PrivateKey, *x509.Certificate, error) {
+func InitCertSSL(aliyunAccessKey string, aliyunAccessSecret string, domain string) error {
+	err := aliyunclear.InitAliyun(aliyunAccessKey, aliyunAccessSecret, domain)
+	if err != nil {
+		return fmt.Errorf("init aliyun failed: %s", err.Error())
+	}
+	return nil
+}
+
+func GetCertificateAndPrivateKey(basedir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string) (crypto.PrivateKey, *x509.Certificate, error) {
 	if email == "" {
 		email = "no-reply@example.com"
 	}
@@ -27,7 +36,7 @@ func GetCertificateAndPrivateKey(basedir string, email string, acmeAddress strin
 		return privateKey, cert, nil
 	}
 
-	privateKey, resource, err := applycert.ApplyCert(basedir, email, acmeAddress, domain)
+	privateKey, resource, err := applycert.ApplyCert(basedir, email, aliyunAccessKey, aliyunAccessSecret, domain)
 	if err != nil {
 		return nil, nil, fmt.Errorf("apply cert failed: %s", err.Error())
 	} else if privateKey == nil || cert == nil {
@@ -48,7 +57,7 @@ type NewCert struct {
 	Error       error
 }
 
-func WatchCertificateAndPrivateKey(dir string, email string, acmeAddress string, domain string, oldCert *x509.Certificate, stopchan chan bool, newchan chan NewCert) error {
+func WatchCertificateAndPrivateKey(dir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string, oldCert *x509.Certificate, stopchan chan bool, newchan chan NewCert) error {
 	for {
 		select {
 		case <-stopchan:
@@ -60,7 +69,7 @@ func WatchCertificateAndPrivateKey(dir string, email string, acmeAddress string,
 			close(stopchan)
 			return nil
 		default:
-			privateKey, cert, err := watchCertificateAndPrivateKey(dir, email, acmeAddress, domain, oldCert)
+			privateKey, cert, err := watchCertificateAndPrivateKey(dir, email, aliyunAccessKey, aliyunAccessSecret, domain, oldCert)
 			if err != nil {
 				newchan <- NewCert{
 					Error: fmt.Errorf("watch cert failed: %s", err.Error()),
@@ -75,7 +84,7 @@ func WatchCertificateAndPrivateKey(dir string, email string, acmeAddress string,
 	}
 }
 
-func watchCertificateAndPrivateKey(dir string, email string, acmeAddress string, domain string, oldCert *x509.Certificate) (crypto.PrivateKey, *x509.Certificate, error) {
+func watchCertificateAndPrivateKey(dir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string, oldCert *x509.Certificate) (crypto.PrivateKey, *x509.Certificate, error) {
 	if email == "" {
 		email = "no-reply@example.com"
 	}
@@ -92,7 +101,7 @@ func watchCertificateAndPrivateKey(dir string, email string, acmeAddress string,
 		return nil, nil, nil
 	}
 
-	privateKey, resource, err := applycert.ApplyCert(dir, email, acmeAddress, domain)
+	privateKey, resource, err := applycert.ApplyCert(dir, email, aliyunAccessKey, aliyunAccessSecret, domain)
 	if err != nil {
 		return nil, nil, fmt.Errorf("apply cert fail: %s", err.Error())
 	}
