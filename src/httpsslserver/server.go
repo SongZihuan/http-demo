@@ -37,11 +37,6 @@ func InitHttpSSLServer() (err error) {
 	HttpSSLAliyunAccessKey = flagparser.HttpsAliyunKey
 	HttpSSLAliyunAccessSecret = flagparser.HttpsAliyunSecret
 
-	err = certssl.InitCertSSL(HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain)
-	if err != nil {
-		return fmt.Errorf("init htttps aliyun dns server error: %s", err.Error())
-	}
-
 	PrivateKey, Certificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain)
 	if err != nil {
 		return fmt.Errorf("init htttps cert ssl server error: %s", err.Error())

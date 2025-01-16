@@ -46,7 +46,7 @@ func CheckCertWithTime(cert *x509.Certificate, gracePeriod time.Duration) bool {
 
 	if now.Before(cert.NotBefore) {
 		return false
-	} else if nowWithGracePeriod.After(cert.NotBefore) {
+	} else if nowWithGracePeriod.After(cert.NotAfter) {
 		return false
 	}
 

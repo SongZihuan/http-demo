@@ -4,19 +4,12 @@ import (
 	"crypto"
 	"crypto/x509"
 	"fmt"
-	"github.com/SongZihuan/Http-Demo/src/certssl/aliyunclear"
 	"github.com/SongZihuan/Http-Demo/src/certssl/applycert"
 	"github.com/SongZihuan/Http-Demo/src/utils"
 	"time"
 )
 
-func InitCertSSL(aliyunAccessKey string, aliyunAccessSecret string, domain string) error {
-	err := aliyunclear.InitAliyun(aliyunAccessKey, aliyunAccessSecret, domain)
-	if err != nil {
-		return fmt.Errorf("init aliyun failed: %s", err.Error())
-	}
-	return nil
-}
+const CertDefaultNewApplyTime = 5 * 24 * time.Hour
 
 func GetCertificateAndPrivateKey(basedir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string) (crypto.PrivateKey, *x509.Certificate, error) {
 	if email == "" {
@@ -97,7 +90,7 @@ func watchCertificateAndPrivateKey(dir string, email string, aliyunAccessKey str
 		return nil, nil, fmt.Errorf("not a valid domain")
 	}
 
-	if utils.CheckCertWithDomain(oldCert, domain) && utils.CheckCertWithTime(oldCert, 5*24*time.Hour) {
+	if utils.CheckCertWithDomain(oldCert, domain) && utils.CheckCertWithTime(oldCert, CertDefaultNewApplyTime) {
 		return nil, nil, nil
 	}
 

@@ -7,7 +7,13 @@ import (
 	"os"
 )
 
+var resource *registration.Resource
+
 func GetAccount(dir string, email string, client *lego.Client) (*registration.Resource, error) {
+	if resource != nil {
+		return resource, nil
+	}
+
 	err := os.MkdirAll(dir, 0775)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create directory %s: %s", dir, err.Error())
@@ -15,6 +21,8 @@ func GetAccount(dir string, email string, client *lego.Client) (*registration.Re
 
 	account, err := loadAccount(dir, email)
 	if err != nil {
+		fmt.Printf("load local account failed, register a ew on for %s: %s\n", email, err.Error())
+
 		account, err = newAccount(email, client)
 		if err != nil {
 			return nil, fmt.Errorf("not local account, new account failed: %s", err.Error())
@@ -27,10 +35,11 @@ func GetAccount(dir string, email string, client *lego.Client) (*registration.Re
 			return nil, fmt.Errorf("not local account, save account failed: %s", err.Error())
 		}
 
-		fmt.Printf("account register success email: %s\n", email)
+		fmt.Printf("account register success for email: %s\n", email)
 	} else {
-		fmt.Printf("load local account success email: %s\n", email)
+		fmt.Printf("load local account success for email: %s\n", email)
 	}
 
-	return account.Resource, nil
+	resource = account.Resource
+	return resource, nil
 }

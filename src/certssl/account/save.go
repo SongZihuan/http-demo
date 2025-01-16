@@ -12,13 +12,13 @@ func saveAccount(dir string, account *Account) error {
 	if err != nil {
 		return fmt.Errorf("failed to create directory %s: %s", dir, err.Error())
 	}
-	filepath := path.Join(dir, fmt.Sprintf("%s.account.jsom", account.Email))
 
 	data, err := json.Marshal(account)
 	if err != nil {
 		return err
 	}
 
+	filepath := path.Join(dir, fmt.Sprintf("%s.account.json", account.Email))
 	err = os.WriteFile(filepath, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write account %s: %s", filepath, err.Error())

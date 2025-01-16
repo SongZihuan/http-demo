@@ -13,12 +13,15 @@ import (
 	"time"
 )
 
+const DefaultCertTimeout = 30 * 24 * time.Hour
+const DefaultCertType = certcrypto.RSA4096
+
 func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string) (crypto.PrivateKey, *certificate.Resource, error) {
 	if domain == "" || !utils.IsValidDomain(domain) {
 		return nil, nil, fmt.Errorf("domain is invalid")
 	}
 
-	privateKey, err := certcrypto.GeneratePrivateKey(certcrypto.RSA4096)
+	privateKey, err := certcrypto.GeneratePrivateKey(DefaultCertType)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate private key failed: %s", err.Error())
 	}
@@ -26,8 +29,8 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 	user := newUser(email, privateKey)
 
 	config := lego.NewConfig(user)
-	config.Certificate.KeyType = certcrypto.RSA4096
-	config.Certificate.Timeout = 30 * 24 * time.Hour
+	config.Certificate.KeyType = DefaultCertType
+	config.Certificate.Timeout = DefaultCertTimeout
 	config.CADirURL = "https://acme-v02.api.letsencrypt.org/directory"
 	client, err := lego.NewClient(config)
 	if err != nil {
