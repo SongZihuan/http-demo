@@ -119,7 +119,7 @@ func (u *Account) SaveAccount() error {
 		return fmt.Errorf("failed to write account %s: %s", u.accountpath, err.Error())
 	}
 
-	privateKeyData, err := utils.EncodePrivateKeyToPEM(u.keypath)
+	privateKeyData, err := utils.EncodePrivateKeyToPEM(u.key)
 	if err != nil {
 		return fmt.Errorf("failed to read account private %s: %s", u.accountpath, err.Error())
 	}
