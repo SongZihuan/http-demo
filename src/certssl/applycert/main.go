@@ -35,16 +35,12 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 	}
 
 	aliyunDnsConfig := alidns.NewDefaultConfig()
-	if aliyunAccessKey != "" {
-		aliyunDnsConfig.APIKey = aliyunAccessKey
-	}
-	if aliyunAccessSecret == "" {
-		aliyunDnsConfig.SecretKey = aliyunAccessSecret
-	}
+	aliyunDnsConfig.APIKey = aliyunAccessKey
+	aliyunDnsConfig.SecretKey = aliyunAccessSecret
 
 	provider, err := alidns.NewDNSProviderConfig(aliyunDnsConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize AliDNS provider: %d", err.Error())
+		return nil, nil, fmt.Errorf("failed to initialize AliDNS provider: %s", err.Error())
 	}
 
 	err = client.Challenge.SetDNS01Provider(provider)
