@@ -21,12 +21,20 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 		return nil, nil, fmt.Errorf("domain is invalid")
 	}
 
-	privateKey, err := certcrypto.GeneratePrivateKey(DefaultCertType)
+	user, err := account.LoadAccount(basedir, email)
 	if err != nil {
-		return nil, nil, fmt.Errorf("generate private key failed: %s", err.Error())
-	}
+		fmt.Printf("load local account failed, register a ew on for %s: %s\n", email, err.Error())
 
-	user := newUser(email, privateKey)
+		privateKey, err := certcrypto.GeneratePrivateKey(DefaultCertType)
+		if err != nil {
+			return nil, nil, fmt.Errorf("generate new user private key failed: %s", err.Error())
+		}
+
+		user, err = account.NewAccount(basedir, email, privateKey)
+		if err != nil {
+			return nil, nil, fmt.Errorf("generate new user failed: %s", err.Error())
+		}
+	}
 
 	config := lego.NewConfig(user)
 	config.Certificate.KeyType = DefaultCertType
@@ -51,13 +59,12 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 		return nil, nil, fmt.Errorf("set challenge dns1 provider failed: %s", err.Error())
 	}
 
-	reg, err := account.GetAccount(path.Join(basedir, "account"), user.GetEmail(), client)
+	reg, err := user.Register(client)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get account failed: %s", err.Error())
 	} else if reg == nil {
 		return nil, nil, fmt.Errorf("get account failed: return nil account.resurce, unknown reason")
 	}
-	user.setRegistration(reg)
 
 	request := certificate.ObtainRequest{
 		Domains: []string{domain},
@@ -67,6 +74,11 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 	resource, err := client.Certificate.Obtain(request)
 	if err != nil {
 		return nil, nil, fmt.Errorf("obtain certificate failed: %s", err.Error())
+	}
+
+	err = user.SaveAccount()
+	if err != nil {
+		return nil, nil, fmt.Errorf("save account error after obtain: %s", err.Error())
 	}
 
 	err = writerWithDate(path.Join(basedir, "cert-backup"), resource)
@@ -79,5 +91,5 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 		return nil, nil, fmt.Errorf("writer certificate failed: %s", err.Error())
 	}
 
-	return privateKey, resource, nil
+	return user.GetPrivateKey(), resource, nil
 }

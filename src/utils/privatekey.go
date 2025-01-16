@@ -2,6 +2,8 @@ package utils
 
 import (
 	"crypto"
+	"crypto/ecdsa"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -34,4 +36,32 @@ func ReadPrivateKey(data []byte) (crypto.PrivateKey, error) {
 	}
 
 	return privateKey, nil
+}
+
+func EncodePrivateKeyToPEM(privateKey crypto.PrivateKey) ([]byte, error) {
+	var pemType string
+	var bytes []byte
+	var err error
+
+	switch priv := privateKey.(type) {
+	case *rsa.PrivateKey:
+		pemType = "RSA PRIVATE KEY"
+		bytes = x509.MarshalPKCS1PrivateKey(priv)
+	case *ecdsa.PrivateKey:
+		pemType = "EC PRIVATE KEY"
+		bytes, err = x509.MarshalECPrivateKey(priv)
+	default:
+		return nil, fmt.Errorf("unsupported private key type")
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal private key: %s", err.Error())
+	}
+
+	block := &pem.Block{
+		Type:  pemType,
+		Bytes: bytes,
+	}
+
+	return pem.EncodeToMemory(block), nil
 }
