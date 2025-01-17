@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/SongZihuan/Http-Demo/src/mainfunc"
+	"github.com/SongZihuan/http-demo/src/mainfunc"
 	"os"
 )
 

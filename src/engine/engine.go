@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"github.com/SongZihuan/Http-Demo/src/handler"
+	"github.com/SongZihuan/http-demo/src/handler"
 	"github.com/gin-gonic/gin"
 )
 

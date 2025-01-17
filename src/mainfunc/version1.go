@@ -3,12 +3,12 @@ package mainfunc
 import (
 	"errors"
 	"fmt"
-	resource "github.com/SongZihuan/Http-Demo"
-	"github.com/SongZihuan/Http-Demo/src/engine"
-	"github.com/SongZihuan/Http-Demo/src/flagparser"
-	"github.com/SongZihuan/Http-Demo/src/httpserver"
-	"github.com/SongZihuan/Http-Demo/src/httpsslserver"
-	"github.com/SongZihuan/Http-Demo/src/signalchan"
+	resource "github.com/SongZihuan/http-demo"
+	"github.com/SongZihuan/http-demo/src/engine"
+	"github.com/SongZihuan/http-demo/src/flagparser"
+	"github.com/SongZihuan/http-demo/src/httpserver"
+	"github.com/SongZihuan/http-demo/src/httpsslserver"
+	"github.com/SongZihuan/http-demo/src/signalchan"
 )
 
 func MainV1() (exitcode int) {

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	resource "github.com/SongZihuan/Http-Demo"
+	resource "github.com/SongZihuan/http-demo"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

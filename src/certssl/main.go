@@ -4,8 +4,8 @@ import (
 	"crypto"
 	"crypto/x509"
 	"fmt"
-	"github.com/SongZihuan/Http-Demo/src/certssl/applycert"
-	"github.com/SongZihuan/Http-Demo/src/utils"
+	"github.com/SongZihuan/http-demo/src/certssl/applycert"
+	"github.com/SongZihuan/http-demo/src/utils"
 	"time"
 )
 

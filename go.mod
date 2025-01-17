@@ -1,4 +1,4 @@
-module github.com/SongZihuan/Http-Demo
+module github.com/SongZihuan/http-demo
 
 go 1.22.0
 

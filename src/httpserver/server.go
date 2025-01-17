@@ -3,8 +3,8 @@ package httpserver
 import (
 	"errors"
 	"fmt"
-	"github.com/SongZihuan/Http-Demo/src/engine"
-	"github.com/SongZihuan/Http-Demo/src/flagparser"
+	"github.com/SongZihuan/http-demo/src/engine"
+	"github.com/SongZihuan/http-demo/src/flagparser"
 	"net/http"
 )
 
