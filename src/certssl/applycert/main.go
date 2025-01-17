@@ -8,7 +8,6 @@ import (
 	"github.com/go-acme/lego/v4/certificate"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/providers/dns/alidns"
-	"path"
 	"time"
 )
 
@@ -74,12 +73,17 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 		return nil, fmt.Errorf("save account error after obtain: %s", err.Error())
 	}
 
-	err = writerWithDate(path.Join(basedir, "cert-backup"), resource)
+	cert, err := utils.ReadCertificate(resource.Certificate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read certificate: %s", err.Error())
+	}
+
+	err = writerWithDate(basedir, cert, resource)
 	if err != nil {
 		return nil, fmt.Errorf("writer certificate backup failed: %s", err.Error())
 	}
 
-	err = writer(basedir, resource)
+	err = writer(basedir, cert, resource)
 	if err != nil {
 		return nil, fmt.Errorf("writer certificate failed: %s", err.Error())
 	}

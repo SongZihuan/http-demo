@@ -1,20 +1,15 @@
 package applycert
 
 import (
+	"crypto/x509"
 	"fmt"
 	"github.com/SongZihuan/http-demo/src/certssl/filename"
-	"github.com/SongZihuan/http-demo/src/utils"
 	"github.com/go-acme/lego/v4/certificate"
 	"os"
 	"path"
 )
 
-func writerWithDate(dir string, resource *certificate.Resource) error {
-	cert, err := utils.ReadCertificate(resource.Certificate)
-	if err != nil {
-		return fmt.Errorf("failed to read certificate: %s", err.Error())
-	}
-
+func writerWithDate(basedir string, cert *x509.Certificate, resource *certificate.Resource) error {
 	domain := cert.Subject.CommonName
 	if domain == "" && len(cert.DNSNames) == 0 {
 		return fmt.Errorf("no domains in certificate")
@@ -25,8 +20,8 @@ func writerWithDate(dir string, resource *certificate.Resource) error {
 	month := fmt.Sprintf("%d", cert.NotBefore.Month())
 	day := fmt.Sprintf("%d", cert.NotBefore.Day())
 
-	backupdir := path.Join(dir, domain, year, month, day)
-	err = os.MkdirAll(backupdir, 0775)
+	backupdir := path.Join(basedir, "cert-backup", domain, year, month, day)
+	err := os.MkdirAll(backupdir, 0775)
 	if err != nil {
 		return err
 	}
@@ -54,28 +49,35 @@ func writerWithDate(dir string, resource *certificate.Resource) error {
 	return nil
 }
 
-func writer(basedir string, resource *certificate.Resource) error {
-	err := os.MkdirAll(basedir, 0775)
+func writer(basedir string, cert *x509.Certificate, resource *certificate.Resource) error {
+	domain := cert.Subject.CommonName
+	if domain == "" && len(cert.DNSNames) == 0 {
+		return fmt.Errorf("no domains in certificate")
+	}
+	domain = cert.DNSNames[0]
+
+	dir := path.Join(basedir, domain)
+	err := os.MkdirAll(dir, 0775)
 	if err != nil {
-		return fmt.Errorf("failed to create directory %s: %s", basedir, err.Error())
+		return fmt.Errorf("failed to create directory %s: %s", dir, err.Error())
 	}
 
-	err = os.WriteFile(path.Join(basedir, filename.FilePrivateKey), resource.PrivateKey, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(path.Join(basedir, filename.FileCertificate), resource.Certificate, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(path.Join(basedir, filename.FileIssuerCertificate), resource.IssuerCertificate, os.ModePerm)
+	err = os.WriteFile(path.Join(dir, filename.FilePrivateKey), resource.PrivateKey, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(basedir, filename.FileCSR), resource.CSR, os.ModePerm)
+	err = os.WriteFile(path.Join(dir, filename.FileCertificate), resource.Certificate, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path.Join(dir, filename.FileIssuerCertificate), resource.IssuerCertificate, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path.Join(dir, filename.FileCSR), resource.CSR, os.ModePerm)
 	if err != nil {
 		return err
 	}

@@ -14,7 +14,9 @@ func InitEngine() error {
 	Engine.Use(gin.Logger(), gin.Recovery())
 
 	Engine.GET("/", handler.HandlerMessage)
+	Engine.GET("/message", handler.HandlerMessage)
 	Engine.GET("/ip", handler.HandlerRemoteIP)
+	Engine.GET("/remote/ip", handler.HandlerRemoteIP)
 	Engine.GET("/client/ip", handler.HandlerClientIP)
 	Engine.GET("/timestamp", handler.HandlerTimestamp)
 	Engine.GET("/datetime", handler.HandlerDatetime)

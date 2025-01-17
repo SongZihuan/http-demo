@@ -37,7 +37,6 @@ func HandlerMessage(c *gin.Context) {
 	res.WriteString(fmt.Sprintf("X-Forwarded-For: %s\n", c.Request.Header.Get(RequestsXForwardedFor)))
 	res.WriteString(fmt.Sprintf("X-Forwarded-Proto: %s\n", c.Request.Header.Get(RequestsXForwardedProto)))
 	res.WriteString(fmt.Sprintf("X-Forwarded-Host: %s\n", c.Request.Header.Get(RequestsXForwardedHost)))
-	res.WriteString(fmt.Sprintf("X-Forwarded-Host: %s\n", c.Request.Header.Get(RequestsXForwardedHost)))
 	res.WriteString(fmt.Sprintf("X-Message: %s\n", strings.Join(c.Request.Header.Values(RequestsXMessage), " ")))
 
 	str := res.String()

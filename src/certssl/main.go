@@ -24,7 +24,7 @@ func GetCertificateAndPrivateKey(basedir string, email string, aliyunAccessKey s
 		return nil, nil, nil, fmt.Errorf("not a valid domain")
 	}
 
-	privateKey, cert, cacert, err := applycert.ReadLocalCertificateAndPrivateKey(basedir)
+	privateKey, cert, cacert, err := applycert.ReadLocalCertificateAndPrivateKey(basedir, domain)
 	if err == nil && utils.CheckCertWithDomain(cert, domain) && utils.CheckCertWithTime(cert, 5*24*time.Hour) {
 		return privateKey, cert, cacert, nil
 	}

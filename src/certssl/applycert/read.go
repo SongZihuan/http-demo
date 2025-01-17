@@ -10,18 +10,19 @@ import (
 	"path"
 )
 
-func ReadLocalCertificateAndPrivateKey(basedir string) (crypto.PrivateKey, *x509.Certificate, *x509.Certificate, error) {
-	cert, err := readCertificate(basedir)
+func ReadLocalCertificateAndPrivateKey(basedir string, domain string) (crypto.PrivateKey, *x509.Certificate, *x509.Certificate, error) {
+	dir := path.Join(basedir, domain)
+	cert, err := readCertificate(dir)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("read certificate failed: %s", err.Error())
 	}
 
-	cacert, err := readCACertificate(basedir)
+	cacert, err := readCACertificate(dir)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("read certificate failed: %s", err.Error())
 	}
 
-	privateKey, err := readPrivateKey(basedir)
+	privateKey, err := readPrivateKey(dir)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("read private key failed: %s", err.Error())
 	}
@@ -29,8 +30,8 @@ func ReadLocalCertificateAndPrivateKey(basedir string) (crypto.PrivateKey, *x509
 	return privateKey, cert, cacert, nil
 }
 
-func readCertificate(basedir string) (*x509.Certificate, error) {
-	filepath := path.Join(basedir, filename.FileCertificate)
+func readCertificate(dir string) (*x509.Certificate, error) {
+	filepath := path.Join(dir, filename.FileCertificate)
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read certificate file: %v", err)
@@ -44,8 +45,8 @@ func readCertificate(basedir string) (*x509.Certificate, error) {
 	return cert, nil
 }
 
-func readCACertificate(basedir string) (*x509.Certificate, error) {
-	filepath := path.Join(basedir, filename.FileIssuerCertificate)
+func readCACertificate(dir string) (*x509.Certificate, error) {
+	filepath := path.Join(dir, filename.FileIssuerCertificate)
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read certificate file: %v", err)
@@ -59,8 +60,8 @@ func readCACertificate(basedir string) (*x509.Certificate, error) {
 	return cert, nil
 }
 
-func readPrivateKey(basedir string) (crypto.PrivateKey, error) {
-	filepath := path.Join(basedir, filename.FilePrivateKey)
+func readPrivateKey(dir string) (crypto.PrivateKey, error) {
+	filepath := path.Join(dir, filename.FilePrivateKey)
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read key file: %v", err)
