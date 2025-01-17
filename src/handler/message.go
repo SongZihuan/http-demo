@@ -20,12 +20,8 @@ func HandlerMessage(c *gin.Context) {
 	res.WriteString(fmt.Sprintf("Host: %s\n", c.Request.Host))
 	res.WriteString(fmt.Sprintf("Proto: %s\n", c.Request.Proto))
 	if c.Request.TLS == nil {
-		res.WriteString(fmt.Sprintf("Https/TLS: %s\n", "No"))
-		res.WriteString(fmt.Sprintf("Http/TLS: %s\n", "Yes"))
 		res.WriteString(fmt.Sprintf("Scheme: %s\n", "HTTP"))
 	} else {
-		res.WriteString(fmt.Sprintf("Https/TLS: %s\n", "Yes"))
-		res.WriteString(fmt.Sprintf("Http/TLS: %s\n", "No"))
 		res.WriteString(fmt.Sprintf("Scheme: %s\n", "HTTPS"))
 	}
 	res.WriteString(fmt.Sprintf("Path: %s\n", c.Request.URL.Path))

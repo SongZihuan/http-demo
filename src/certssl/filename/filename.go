@@ -5,4 +5,5 @@ const (
 	FileCertificate       = "cert.pem"
 	FileIssuerCertificate = "ca-cert.pem"
 	FileCSR               = "csr.pem"
+	FileResource          = "resource.json"
 )

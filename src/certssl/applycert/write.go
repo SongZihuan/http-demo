@@ -2,6 +2,7 @@ package applycert
 
 import (
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"github.com/SongZihuan/http-demo/src/certssl/filename"
 	"github.com/go-acme/lego/v4/certificate"
@@ -20,7 +21,7 @@ func writerWithDate(basedir string, cert *x509.Certificate, resource *certificat
 	month := fmt.Sprintf("%d", cert.NotBefore.Month())
 	day := fmt.Sprintf("%d", cert.NotBefore.Day())
 
-	backupdir := path.Join(basedir, "cert-backup", domain, year, month, day)
+	backupdir := path.Join(basedir, "cert-backup", domain, year, month, day, cert.NotBefore.Format("2006-01-02-15:04:05"))
 	err := os.MkdirAll(backupdir, 0775)
 	if err != nil {
 		return err
@@ -42,6 +43,16 @@ func writerWithDate(basedir string, cert *x509.Certificate, resource *certificat
 	}
 
 	err = os.WriteFile(path.Join(backupdir, filename.FileCSR), resource.CSR, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(resource)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path.Join(backupdir, filename.FileResource), data, os.ModePerm)
 	if err != nil {
 		return err
 	}
