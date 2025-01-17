@@ -93,5 +93,15 @@ func writer(basedir string, cert *x509.Certificate, resource *certificate.Resour
 		return err
 	}
 
+	data, err := json.Marshal(resource)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path.Join(dir, filename.FileResource), data, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
