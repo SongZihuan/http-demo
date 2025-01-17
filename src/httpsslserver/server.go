@@ -25,7 +25,7 @@ var HttpSSLAliyunAccessSecret string
 
 var PrivateKey crypto.PrivateKey
 var Certificate *x509.Certificate
-var IssuserCertificate *x509.Certificate
+var IssuerCertificate *x509.Certificate
 
 var ErrStop = fmt.Errorf("https server error")
 var ReloadMutex sync.Mutex
@@ -38,10 +38,10 @@ func InitHttpSSLServer() (err error) {
 	HttpSSLAliyunAccessKey = flagparser.HttpsAliyunKey
 	HttpSSLAliyunAccessSecret = flagparser.HttpsAliyunSecret
 
-	PrivateKey, Certificate, IssuserCertificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain)
+	PrivateKey, Certificate, IssuerCertificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain)
 	if err != nil {
 		return fmt.Errorf("init htttps cert ssl server error: %s", err.Error())
-	} else if PrivateKey == nil || Certificate == nil || IssuserCertificate == nil {
+	} else if PrivateKey == nil || Certificate == nil || IssuerCertificate == nil {
 		return fmt.Errorf("init https server error: get key and cert error, return nil, unknown reason")
 	}
 
@@ -54,17 +54,17 @@ func InitHttpSSLServer() (err error) {
 }
 
 func initHttpSSLServer() (err error) {
-	if PrivateKey == nil || Certificate == nil || IssuserCertificate == nil {
+	if PrivateKey == nil || Certificate == nil || IssuerCertificate == nil {
 		return fmt.Errorf("init https server error: get key and cert error, return nil, unknown reason")
 	}
 
-	if Certificate.Raw == nil || len(Certificate.Raw) == 0 || IssuserCertificate.Raw == nil || len(IssuserCertificate.Raw) == 0 {
+	if Certificate.Raw == nil || len(Certificate.Raw) == 0 || IssuerCertificate.Raw == nil || len(IssuerCertificate.Raw) == 0 {
 		return fmt.Errorf("init https server error: get cert.raw error, return nil, unknown reason")
 	}
 
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{{
-			Certificate: [][]byte{Certificate.Raw, IssuserCertificate.Raw}, // Raw包含 DER 编码的证书
+			Certificate: [][]byte{Certificate.Raw, IssuerCertificate.Raw}, // Raw包含 DER 编码的证书
 			PrivateKey:  PrivateKey,
 			Leaf:        Certificate,
 		}},
@@ -140,7 +140,7 @@ func WatchCertificate(stopchan chan bool) {
 
 					PrivateKey = res.PrivateKey
 					Certificate = res.Certificate
-					IssuserCertificate = res.IssuerCertificate
+					IssuerCertificate = res.IssuerCertificate
 					err = initHttpSSLServer()
 					if err != nil {
 						fmt.Printf("https server reload init error: %s", err.Error())
