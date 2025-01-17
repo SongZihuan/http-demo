@@ -83,7 +83,7 @@ func MainV1() (exitcode int) {
 		fmt.Printf("Http Server error closed: %s\n", err.Error())
 		return 1
 	case err := <-httpsslchan:
-		if errors.Is(err, httpserver.ErrStop) {
+		if errors.Is(err, httpsslserver.ErrStop) {
 			fmt.Printf("Https Server closed: safe\n")
 			return 0
 		}

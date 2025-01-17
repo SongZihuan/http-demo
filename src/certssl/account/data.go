@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/SongZihuan/Http-Demo/src/utils"
+	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
 	"os"
@@ -13,9 +14,11 @@ import (
 )
 
 const DefaultAccountExp = 24 * time.Hour
+const DefaultUserKeyType = certcrypto.RSA4096
 
 var ErrExpiredAccount = fmt.Errorf("account expired")
 var ErrNotValidAccount = fmt.Errorf("account not valid")
+var user *Account
 
 type Data struct {
 	Resource       *registration.Resource `json:"resource,omitempty"`
@@ -28,32 +31,43 @@ type Data struct {
 type Account struct {
 	data        Data
 	key         crypto.PrivateKey
+	dir         string
 	accountpath string
 	keypath     string
 }
 
-func NewAccount(basedir string, email string, key crypto.PrivateKey) (*Account, error) {
+func NewAccount(basedir string, email string) (*Account, error) {
 	dir := path.Join(basedir, "account", email)
 	err := os.MkdirAll(dir, 0775)
 	if err != nil {
 		return nil, fmt.Errorf("create account dir failed: %s", err.Error())
 	}
 
+	privateKey, err := certcrypto.GeneratePrivateKey(DefaultUserKeyType)
+	if err != nil {
+		return nil, fmt.Errorf("generate new user private key failed: %s", err.Error())
+	}
+
 	now := time.Now()
-	return &Account{
+	user = &Account{
 		data: Data{
 			Email:          email,
 			Resource:       nil,
 			RegisterTime:   now.Unix(),
 			ExpirationTime: now.Add(DefaultAccountExp).Unix(),
 		},
-		key:         key,
+		key:         privateKey,
+		dir:         dir,
 		accountpath: path.Join(dir, "account.json"),
 		keypath:     path.Join(dir, "account.key"),
-	}, nil
+	}
+	return user, nil
 }
 
 func LoadAccount(basedir string, email string) (*Account, error) {
+	if user != nil {
+		return user, nil
+	}
 
 	dir := path.Join(basedir, "account", email)
 	accountpath := path.Join(dir, "account.json")
@@ -88,12 +102,14 @@ func LoadAccount(basedir string, email string) (*Account, error) {
 		return nil, ErrNotValidAccount
 	}
 
-	return &Account{
+	user = &Account{
 		data:        data,
 		key:         privateKey,
+		dir:         dir,
 		accountpath: accountpath,
 		keypath:     keypath,
-	}, nil
+	}
+	return user, nil
 }
 
 func (u *Account) GetEmail() string {
@@ -109,7 +125,12 @@ func (u *Account) GetPrivateKey() crypto.PrivateKey {
 }
 
 func (u *Account) SaveAccount() error {
-	data, err := json.Marshal(u)
+	err := os.MkdirAll(u.dir, 0775)
+	if err != nil {
+		return fmt.Errorf("create account dir failed: %s", err.Error())
+	}
+
+	data, err := json.Marshal(u.data)
 	if err != nil {
 		return err
 	}

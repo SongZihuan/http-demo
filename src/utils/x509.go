@@ -50,5 +50,5 @@ func CheckCertWithTime(cert *x509.Certificate, gracePeriod time.Duration) bool {
 		return false
 	}
 
-	return false
+	return true
 }

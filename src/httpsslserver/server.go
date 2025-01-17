@@ -25,8 +25,9 @@ var HttpSSLAliyunAccessSecret string
 
 var PrivateKey crypto.PrivateKey
 var Certificate *x509.Certificate
+var IssuserCertificate *x509.Certificate
 
-var ErrStop = fmt.Errorf("http server error")
+var ErrStop = fmt.Errorf("https server error")
 var ReloadMutex sync.Mutex
 
 func InitHttpSSLServer() (err error) {
@@ -37,9 +38,11 @@ func InitHttpSSLServer() (err error) {
 	HttpSSLAliyunAccessKey = flagparser.HttpsAliyunKey
 	HttpSSLAliyunAccessSecret = flagparser.HttpsAliyunSecret
 
-	PrivateKey, Certificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain)
+	PrivateKey, Certificate, IssuserCertificate, err = certssl.GetCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain)
 	if err != nil {
 		return fmt.Errorf("init htttps cert ssl server error: %s", err.Error())
+	} else if PrivateKey == nil || Certificate == nil || IssuserCertificate == nil {
+		return fmt.Errorf("init https server error: get key and cert error, return nil, unknown reason")
 	}
 
 	err = initHttpSSLServer()
@@ -51,12 +54,21 @@ func InitHttpSSLServer() (err error) {
 }
 
 func initHttpSSLServer() (err error) {
+	if PrivateKey == nil || Certificate == nil || IssuserCertificate == nil {
+		return fmt.Errorf("init https server error: get key and cert error, return nil, unknown reason")
+	}
+
+	if Certificate.Raw == nil || len(Certificate.Raw) == 0 || IssuserCertificate.Raw == nil || len(IssuserCertificate.Raw) == 0 {
+		return fmt.Errorf("init https server error: get cert.raw error, return nil, unknown reason")
+	}
+
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{{
-			Certificate: [][]byte{Certificate.Raw}, // Raw包含 DER 编码的证书
+			Certificate: [][]byte{Certificate.Raw, IssuserCertificate.Raw}, // Raw包含 DER 编码的证书
 			PrivateKey:  PrivateKey,
 			Leaf:        Certificate,
 		}},
+		MinVersion: tls.VersionTLS12,
 	}
 
 	HttpSSLServer = &http.Server{
@@ -70,7 +82,7 @@ func initHttpSSLServer() (err error) {
 
 func RunServer() error {
 	stopchan := make(chan bool)
-	WatchCert(stopchan)
+	WatchCertificate(stopchan)
 	err := runServer()
 	stopchan <- true
 	return err
@@ -95,11 +107,11 @@ ListenCycle:
 	}
 }
 
-func WatchCert(stopchan chan bool) {
+func WatchCertificate(stopchan chan bool) {
 	newchan := make(chan certssl.NewCert)
 
 	go func() {
-		err := certssl.WatchCertificateAndPrivateKey(HttpSSLCertDir, HttpSSLEmail, HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain, Certificate, stopchan, newchan)
+		err := certssl.WatchCertificate(HttpSSLCertDir, HttpSSLEmail, HttpSSLAliyunAccessKey, HttpSSLAliyunAccessSecret, HttpSSLDomain, Certificate, stopchan, newchan)
 		if err != nil {
 			fmt.Printf("watch https cert server error: %s", err.Error())
 		}
@@ -113,7 +125,7 @@ func WatchCert(stopchan chan bool) {
 				return
 			} else if res.Error != nil {
 				fmt.Printf("https cert reload server error: %s", res.Error.Error())
-			} else if res.PrivateKey == nil && res.Certificate == nil {
+			} else if res.PrivateKey != nil && res.Certificate != nil && res.IssuerCertificate != nil {
 				func() {
 					ReloadMutex.Lock()
 					defer ReloadMutex.Unlock()
@@ -123,11 +135,16 @@ func WatchCert(stopchan chan bool) {
 
 					err := HttpSSLServer.Shutdown(ctx)
 					if err != nil {
-						fmt.Printf("https server reload error: %s", err.Error())
+						fmt.Printf("https server reload shutdown error: %s", err.Error())
 					}
 
 					PrivateKey = res.PrivateKey
 					Certificate = res.Certificate
+					IssuserCertificate = res.IssuerCertificate
+					err = initHttpSSLServer()
+					if err != nil {
+						fmt.Printf("https server reload init error: %s", err.Error())
+					}
 				}()
 			}
 		}
