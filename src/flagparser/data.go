@@ -13,7 +13,7 @@ var HttpsCertDir = "./ssl-certs"
 var HttpsAliyunKey string
 var HttpsAliyunSecret string
 var DryRun = false
-var Verbose = false
+var Version = false
 
 func Print() {
 	fmt.Println("HttpAddress:", HttpAddress)

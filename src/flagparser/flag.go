@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func InitFlag() (err error) {
+func initFlag() (err error) {
 	defer func() {
 		e := recover()
 		if e != nil {
@@ -27,8 +27,8 @@ func InitFlag() (err error) {
 
 	flag.BoolVar(&DryRun, "dry-run", DryRun, "only parser the options")
 
-	flag.BoolVar(&Verbose, "version", Verbose, "show the version")
-	flag.BoolVar(&Verbose, "v", Verbose, "show the version")
+	flag.BoolVar(&Version, "version", Version, "show the version")
+	flag.BoolVar(&Version, "v", Version, "show the version")
 
 	flag.Parse()
 

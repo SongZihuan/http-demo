@@ -12,14 +12,21 @@ import (
 )
 
 func MainV1() (exitcode int) {
+	defer func() {
+		if recover() != nil {
+			exitcode = 1
+			return
+		}
+	}()
+
 	fmt.Printf("")
-	err := flagparser.InitFlag()
+	err := flagparser.InitFlagParser()
 	if err != nil {
 		fmt.Printf("init flag fail: %s\n", err.Error())
 		return 1
 	}
 
-	if flagparser.Verbose {
+	if flagparser.Version {
 		fmt.Printf("Version: %s\n", resource.Version)
 		return 0
 	}
@@ -42,12 +49,6 @@ func MainV1() (exitcode int) {
 	}
 	defer signalchan.CloseSignal()
 
-	err = httpserver.InitHttpServer()
-	if err != nil {
-		fmt.Printf("init http server fail: %s\n", err.Error())
-		return 1
-	}
-
 	var httpchan = make(chan error)
 	var httpsslchan = make(chan error)
 	defer func() {
@@ -55,9 +56,17 @@ func MainV1() (exitcode int) {
 		close(httpsslchan)
 	}()
 
-	go func() {
-		httpchan <- httpserver.RunServer()
-	}()
+	if flagparser.HttpAddress != "" {
+		err = httpserver.InitHttpServer()
+		if err != nil {
+			fmt.Printf("init http server fail: %s\n", err.Error())
+			return 1
+		}
+
+		go func() {
+			httpchan <- httpserver.RunServer()
+		}()
+	}
 
 	if flagparser.HttpsAddress != "" {
 		err = httpsslserver.InitHttpSSLServer()
@@ -90,4 +99,5 @@ func MainV1() (exitcode int) {
 		fmt.Printf("Https Server error closed: %s\n", err.Error())
 		return 1
 	}
+	// 后续不可达
 }
