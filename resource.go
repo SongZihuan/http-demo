@@ -10,5 +10,5 @@ var Version string
 //go:embed LICENSE
 var License string
 
-//go:embed
+//go:embed REEPORT
 var Report string
