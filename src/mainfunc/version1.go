@@ -3,7 +3,6 @@ package mainfunc
 import (
 	"errors"
 	"fmt"
-	resource "github.com/SongZihuan/http-demo"
 	"github.com/SongZihuan/http-demo/src/engine"
 	"github.com/SongZihuan/http-demo/src/flagparser"
 	"github.com/SongZihuan/http-demo/src/httpserver"
@@ -19,7 +18,7 @@ func MainV1() (exitcode int) {
 		}
 	}()
 
-	fmt.Printf("")
+	var hasPrint = false
 	err := flagparser.InitFlagParser()
 	if err != nil {
 		fmt.Printf("init flag fail: %s\n", err.Error())
@@ -27,12 +26,38 @@ func MainV1() (exitcode int) {
 	}
 
 	if flagparser.Version {
-		fmt.Printf("Version: %s\n", resource.Version)
+		_, _ = flagparser.PrintVersion()
+		hasPrint = true
 		return 0
 	}
 
-	if flagparser.DryRun {
+	if flagparser.License {
+		if hasPrint {
+			_, _ = flagparser.PrintLF()
+		}
+		_, _ = flagparser.PrintLicense()
+		hasPrint = true
+		return 0
+	}
+
+	if flagparser.Report {
+		if hasPrint {
+			_, _ = flagparser.PrintLF()
+		}
+		_, _ = flagparser.PrintReport()
+		hasPrint = true
+		return 0
+	}
+
+	if flagparser.DryRun || flagparser.ShowOption {
+		if hasPrint {
+			_, _ = flagparser.PrintLF()
+		}
+
 		flagparser.Print()
+	}
+
+	if flagparser.DryRun {
 		return 0
 	}
 

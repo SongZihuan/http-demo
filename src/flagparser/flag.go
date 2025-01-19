@@ -3,6 +3,7 @@ package flagparser
 import (
 	"flag"
 	"fmt"
+	"os"
 )
 
 func initFlag() (err error) {
@@ -13,6 +14,8 @@ func initFlag() (err error) {
 			return
 		}
 	}()
+
+	flag.CommandLine.SetOutput(os.Stdout)
 
 	flag.StringVar(&HttpAddress, "address", HttpAddress, "http server listen address")
 	flag.StringVar(&HttpAddress, "http-address", HttpAddress, "http server listen address")
@@ -29,6 +32,15 @@ func initFlag() (err error) {
 
 	flag.BoolVar(&Version, "version", Version, "show the version")
 	flag.BoolVar(&Version, "v", Version, "show the version")
+
+	flag.BoolVar(&License, "license", License, "show the license")
+	flag.BoolVar(&License, "l", License, "show the license")
+
+	flag.BoolVar(&Report, "report", Report, "show the report")
+	flag.BoolVar(&Report, "r", Report, "show the report")
+
+	flag.BoolVar(&ShowOption, "show-option", ShowOption, "show the option")
+	flag.BoolVar(&ShowOption, "s", ShowOption, "show the option")
 
 	flag.Parse()
 

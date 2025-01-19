@@ -6,3 +6,9 @@ import (
 
 //go:embed VERSION
 var Version string
+
+//go:embed LICENSE
+var License string
+
+//go:embed
+var Report string
