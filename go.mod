@@ -2,8 +2,6 @@ module github.com/SongZihuan/http-demo
 
 go 1.22.0
 
-toolchain go1.23
-
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-acme/lego/v4 v4.21.0
