@@ -11,7 +11,7 @@ Http默认监听端口`:3366`，可通过`--address`和`-http-address`参数更�
 Https默认不监听，可通过`--https-address`参数开启监听。
 
 HTTPS默认使用acme的DNS-01调整申请HTTPS证书，因此你需要配置：`--https-domain`域名，`--https-aliyun-dns-access-key`和`--https-aliyun-dns-access-secret`阿里云具有DNS权限的RAM用户的Key和Secret。
-你还可以选择性配置`--https-email`，申请CA联系人你（不会体现在证书上），默认为`no-reply@example.com`。
+你还可以选择性配置`--https-email`，申请CA联系人你（不会体现在证书上）。
 你还可以选择性配置`--https-cert-dir`，保存证书和和账号信息（每个邮箱都会对应一个账户），默认为当前目录下`ssl-certs`文件夹。
 
 ## 环境变量
