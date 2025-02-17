@@ -1,4 +1,4 @@
-package mainfunc
+package httpdemo
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"github.com/SongZihuan/http-demo/src/httpserver"
 	"github.com/SongZihuan/http-demo/src/httpsslserver"
 	"github.com/SongZihuan/http-demo/src/signalchan"
+	"sync"
 )
 
 func MainV1() (exitcode int) {
@@ -104,6 +105,21 @@ func MainV1() (exitcode int) {
 			httpsslchan <- httpsslserver.RunServer()
 		}()
 	}
+
+	defer func() {
+		var wg sync.WaitGroup
+
+		go func() {
+			defer wg.Done()
+			_ = httpserver.StopServer()
+		}()
+
+		go func() {
+			defer wg.Done()
+			_ = httpsslserver.StopServer()
+		}()
+
+	}()
 
 	select {
 	case <-signalchan.SignalChan:
