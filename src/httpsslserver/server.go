@@ -189,17 +189,14 @@ func watchCertificate(stopchan chan bool) {
 	}()
 
 	go func() {
-		close(newCertChan)
+		defer close(newCertChan)
 
 		for {
 			select {
 			case <-stopchan:
 				return
 			case res := <-newCertChan:
-				if res.Certificate == nil && res.PrivateKey == nil && res.Error == nil {
-					close(newCertChan)
-					return
-				} else if res.Error != nil {
+				if res.Error != nil {
 					fmt.Printf("https cert reload server error: %s", res.Error.Error())
 				} else if res.PrivateKey != nil && res.Certificate != nil && res.IssuerCertificate != nil {
 					func() {
